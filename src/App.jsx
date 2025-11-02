@@ -7,12 +7,12 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 const SENTENCE_BANK = [
   {
     id: 'practice',
-    prompt: '我不喜欢在这里',
+    prompt: '我的名字是xx',
     tokens: [
-      { type: 'word', text: 'Practice' },
-      { type: 'word', text: 'makes' },
-      { type: 'word', text: 'perfect' },
-      { type: 'symbol', text: '.' },
+      { type: 'word', text: 'My' },
+      { type: 'word', text: 'name' },
+      { type: 'word', text: 'is' },
+      { type: 'word', text: 'xx' },
     ],
   },
   {
