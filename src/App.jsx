@@ -434,41 +434,39 @@ function App() {
           </div>
 
           <div className="flex flex-col items-center justify-center gap-6 bg-background/70 px-6 py-10 text-sm shadow-xl backdrop-blur-sm md:px-12 md:py-16">
-            <div className="flex w-full flex-wrap items-center justify-center gap-4">
+            <div className="flex w-full flex-wrap items-center gap-2 md:flex-row">
               <Button
-                variant="ghost"
-                size="icon"
+                variant="outline"
+                className="flex h-12 flex-1 min-w-[140px] items-center justify-center gap-2 text-base"
                 onClick={goPreviousSentence}
-                className="flex h-12 w-12 items-center justify-center"
               >
-                <ChevronLeft className="h-6 w-6" />
-                <span className="sr-only">上一句</span>
+                <ChevronLeft className="h-5 w-5" />
+                上一句
               </Button>
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <Button size="sm" onClick={handleSubmit}>
+              <div className="flex flex-1 min-w-[240px] flex-wrap items-center justify-center gap-2 md:gap-3">
+                <Button variant="outline" className="h-12 px-6" onClick={handleSubmit}>
                   提交 (Enter)
                 </Button>
-                <Button size="sm" variant="outline" onClick={handleToggleAnswer}>
+                <Button variant="outline" className="h-12 px-6" onClick={handleToggleAnswer}>
                   {showAnswer ? '隐藏答案' : '显示答案'} (Ctrl ;)
                 </Button>
-                <Button size="sm" variant="outline" onClick={handlePlaySound}>
+                <Button variant="outline" className="h-12 px-6" onClick={handlePlaySound}>
                   播放声音 (Ctrl ')
                 </Button>
-                <Button size="sm" variant="ghost" onClick={resetCurrentSentence}>
+                <Button variant="outline" className="h-12 px-6" onClick={resetCurrentSentence}>
                   重置 (Ctrl N)
                 </Button>
-                <Button size="sm" variant="secondary" onClick={handleMarkMastered}>
+                <Button variant="outline" className="h-12 px-6" onClick={handleMarkMastered}>
                   标记掌握 (Ctrl M)
                 </Button>
               </div>
               <Button
-                variant="ghost"
-                size="icon"
+                variant="outline"
+                className="flex h-12 flex-1 min-w-[140px] items-center justify-center gap-2 text-base"
                 onClick={goNextSentence}
-                className="flex h-12 w-12 items-center justify-center"
               >
-                <ChevronRight className="h-6 w-6" />
-                <span className="sr-only">下一句</span>
+                下一句
+                <ChevronRight className="h-5 w-5" />
               </Button>
             </div>
           </div>
