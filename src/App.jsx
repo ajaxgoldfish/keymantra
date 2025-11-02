@@ -446,19 +446,19 @@ function App() {
               </Button>
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <Button size="sm" onClick={handleSubmit}>
-                  提交 <span className="ml-2 rounded border border-border/60 px-1.5 py-0.5 text-[0.65rem] text-muted-foreground">Enter</span>
+                  提交 (Enter)
                 </Button>
                 <Button size="sm" variant="outline" onClick={handleToggleAnswer}>
-                  {showAnswer ? '隐藏答案' : '显示答案'} <span className="ml-2 rounded border border-border/60 px-1.5 py-0.5 text-[0.65rem] text-muted-foreground">Ctrl ;</span>
+                  {showAnswer ? '隐藏答案' : '显示答案'} (Ctrl ;)
                 </Button>
                 <Button size="sm" variant="outline" onClick={handlePlaySound}>
-                  播放声音 <span className="ml-2 rounded border border-border/60 px-1.5 py-0.5 text-[0.65rem] text-muted-foreground">Ctrl '</span>
+                  播放声音 (Ctrl ')
                 </Button>
                 <Button size="sm" variant="ghost" onClick={resetCurrentSentence}>
-                  重置 <span className="ml-2 rounded border border-border/60 px-1.5 py-0.5 text-[0.65rem] text-muted-foreground">Ctrl N</span>
+                  重置 (Ctrl N)
                 </Button>
                 <Button size="sm" variant="secondary" onClick={handleMarkMastered}>
-                  标记掌握 <span className="ml-2 rounded border border-border/60 px-1.5 py-0.5 text-[0.65rem] text-muted-foreground">Ctrl M</span>
+                  标记掌握 (Ctrl M)
                 </Button>
               </div>
               <Button
