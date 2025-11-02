@@ -435,39 +435,35 @@ function App() {
 
           <div className="flex flex-col items-center justify-center gap-6 bg-background/70 px-6 py-10 text-sm shadow-xl backdrop-blur-sm md:px-12 md:py-16">
             <div className="flex w-full flex-wrap items-center gap-2 md:flex-row">
-              <Button
-                variant="outline"
-                className="flex h-12 flex-1 min-w-[140px] items-center justify-center gap-2 text-base"
-                onClick={goPreviousSentence}
-              >
-                <ChevronLeft className="h-5 w-5" />
-                上一句
-              </Button>
-              <div className="flex flex-1 min-w-[240px] flex-wrap items-center justify-center gap-2 md:gap-3">
-                <Button variant="outline" className="h-12 px-6" onClick={handleSubmit}>
+              <div className="flex flex-1 min-w-[140px] justify-center">
+                <Button variant="outline" onClick={goPreviousSentence}>
+                  <ChevronLeft />
+                  上一句
+                </Button>
+              </div>
+              <div className="flex flex-1 min-w-[260px] flex-wrap items-center justify-center gap-2 md:gap-3">
+                <Button variant="outline" onClick={handleSubmit}>
                   提交 (Enter)
                 </Button>
-                <Button variant="outline" className="h-12 px-6" onClick={handleToggleAnswer}>
+                <Button variant="outline" onClick={handleToggleAnswer}>
                   {showAnswer ? '隐藏答案' : '显示答案'} (Ctrl ;)
                 </Button>
-                <Button variant="outline" className="h-12 px-6" onClick={handlePlaySound}>
+                <Button variant="outline" onClick={handlePlaySound}>
                   播放声音 (Ctrl ')
                 </Button>
-                <Button variant="outline" className="h-12 px-6" onClick={resetCurrentSentence}>
+                <Button variant="outline" onClick={resetCurrentSentence}>
                   重置 (Ctrl N)
                 </Button>
-                <Button variant="outline" className="h-12 px-6" onClick={handleMarkMastered}>
+                <Button variant="outline" onClick={handleMarkMastered}>
                   标记掌握 (Ctrl M)
                 </Button>
               </div>
-              <Button
-                variant="outline"
-                className="flex h-12 flex-1 min-w-[140px] items-center justify-center gap-2 text-base"
-                onClick={goNextSentence}
-              >
-                下一句
-                <ChevronRight className="h-5 w-5" />
-              </Button>
+              <div className="flex flex-1 min-w-[140px] justify-center">
+                <Button variant="outline" onClick={goNextSentence}>
+                  下一句
+                  <ChevronRight />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
