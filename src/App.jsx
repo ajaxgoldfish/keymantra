@@ -441,21 +441,21 @@ function App() {
                   上一句
                 </Button>
               </div>
-              <div className="flex flex-1 min-w-[260px] flex-wrap items-center justify-center gap-2 md:gap-3">
+              <div >
                 <Button variant="outline" onClick={handleSubmit}>
-                  提交 (Enter)
+                  提交 Enter
                 </Button>
                 <Button variant="outline" onClick={handleToggleAnswer}>
-                  {showAnswer ? '隐藏答案' : '显示答案'} (Ctrl ;)
+                  {showAnswer ? '隐藏答案' : '显示答案'} Ctrl ;
                 </Button>
                 <Button variant="outline" onClick={handlePlaySound}>
-                  播放声音 (Ctrl ')
+                  播放声音 Ctrl '
                 </Button>
                 <Button variant="outline" onClick={resetCurrentSentence}>
-                  重置 (Ctrl N)
+                  重置 Ctrl N
                 </Button>
                 <Button variant="outline" onClick={handleMarkMastered}>
-                  标记掌握 (Ctrl M)
+                  标记掌握 Ctrl M
                 </Button>
               </div>
               <div className="flex flex-1 min-w-[140px] justify-center">
