@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -32,14 +31,6 @@ const SENTENCE_BANK = [
       { type: 'symbol', text: '.' },
     ],
   },
-]
-
-const KEY_HINTS = [
-  { keys: ['Ctrl', "'"], label: '播放发音' },
-  { keys: ['Ctrl', 'M'], label: '掌握' },
-  { keys: ['Ctrl', 'N'], label: '生词' },
-  { keys: ['Enter'], label: '提交' },
-  { keys: ['Ctrl', ';'], label: '显示答案' },
 ]
 
 function prepareSentenceTokens(definition) {
@@ -148,31 +139,6 @@ function useTone() {
   }
 }
 
-const STATUS_BADGE_STYLES = {
-  success: 'border-transparent bg-emerald-100 text-emerald-700 hover:bg-emerald-100',
-  error: 'border-transparent bg-red-100 text-red-700 hover:bg-red-100',
-  warn: 'border-transparent bg-amber-100 text-amber-700 hover:bg-amber-100',
-  info: 'border border-border bg-muted/70 text-muted-foreground hover:bg-muted/70',
-}
-
-function KeyHint({ keys, label }) {
-  return (
-    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-      <div className="flex items-center gap-1">
-        {keys.map((key) => (
-          <span
-            key={`${label}-${key}`}
-            className="rounded-md border border-border/70 bg-muted/60 px-2 py-1 font-medium leading-none"
-          >
-            {key}
-          </span>
-        ))}
-      </div>
-      <span>{label}</span>
-    </div>
-  )
-}
-
 function App() {
   const [sentenceIndex, setSentenceIndex] = useState(0)
   const [tokens, setTokens] = useState(() => prepareSentenceTokens(SENTENCE_BANK[0]))
@@ -181,7 +147,6 @@ function App() {
   const [focusing, setFocusing] = useState(false)
   const [isComposing, setIsComposing] = useState(false)
   const [showAnswer, setShowAnswer] = useState(false)
-  const [status, setStatus] = useState(null)
   const inputRef = useRef(null)
   const lastTypingTs = useRef(0)
 
@@ -201,7 +166,6 @@ function App() {
     setTokens(prepared)
     setActiveIndex(firstWordIndex)
     setInputValue(firstWordIndex !== -1 ? prepared[firstWordIndex].userInput ?? '' : '')
-    setStatus(null)
     setShowAnswer(false)
     focusInput()
   }, [activeSentence, focusInput])
@@ -233,7 +197,6 @@ function App() {
   const handleChange = (event) => {
     const value = event.target.value
     setInputValue(value)
-    setStatus(null)
     setTokens((prev) => prev.map((token, index) => {
       if (index !== activeIndex || token.type !== 'word') return token
       return { ...token, userInput: value, incorrect: false }
@@ -276,7 +239,6 @@ function App() {
     setTokens(updated)
     setActiveIndex(previousIndex)
     setInputValue('')
-    setStatus(null)
     focusInput()
   }, [tokens, activeIndex, focusInput])
 
@@ -304,12 +266,10 @@ function App() {
         setInputValue(updatedTokens[nextIndex].userInput ?? '')
       } else {
         setInputValue('')
-        setStatus({ type: 'success', text: '本句所有单词正确，按提交确认。' })
       }
     } else {
       playError()
       setInputValue(rawInput)
-      setStatus({ type: 'error', text: `"${current.text}" 拼写不对，再试试。` })
     }
   }, [tokens, activeIndex, inputValue, playSuccess, playError])
 
@@ -329,10 +289,8 @@ function App() {
 
     if (hasError) {
       playError()
-      setStatus({ type: 'error', text: '还有单词没对上，继续努力。' })
     } else {
       playSuccess()
-      setStatus({ type: 'success', text: '太棒了！整句全部正确。' })
     }
   }, [playSuccess, playError])
 
@@ -355,7 +313,6 @@ function App() {
 
   const handleMarkMastered = () => {
     playSuccess()
-    setStatus({ type: 'info', text: '已标记为掌握（示例功能）。' })
   }
 
   const handleKeyDown = (event) => {
@@ -477,46 +434,41 @@ function App() {
           </div>
 
           <div className="flex flex-col items-center justify-center gap-6 bg-background/70 px-6 py-10 text-sm shadow-xl backdrop-blur-sm md:px-12 md:py-16">
-            <div className="flex w-full flex-col items-center justify-center gap-4 md:flex-row md:justify-between">
-              <Button variant="ghost" size="icon" onClick={goPreviousSentence}>
-                <ChevronLeft className="h-5 w-5" />
+            <div className="flex w-full flex-wrap items-center justify-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={goPreviousSentence}
+                className="flex h-12 w-12 items-center justify-center"
+              >
+                <ChevronLeft className="h-6 w-6" />
                 <span className="sr-only">上一句</span>
               </Button>
               <div className="flex flex-wrap items-center justify-center gap-3">
-                {KEY_HINTS.map((hint) => (
-                  <KeyHint key={hint.label} {...hint} />
-                ))}
+                <Button size="sm" onClick={handleSubmit}>
+                  提交 <span className="ml-2 rounded border border-border/60 px-1.5 py-0.5 text-[0.65rem] text-muted-foreground">Enter</span>
+                </Button>
+                <Button size="sm" variant="outline" onClick={handleToggleAnswer}>
+                  {showAnswer ? '隐藏答案' : '显示答案'} <span className="ml-2 rounded border border-border/60 px-1.5 py-0.5 text-[0.65rem] text-muted-foreground">Ctrl ;</span>
+                </Button>
+                <Button size="sm" variant="outline" onClick={handlePlaySound}>
+                  播放声音 <span className="ml-2 rounded border border-border/60 px-1.5 py-0.5 text-[0.65rem] text-muted-foreground">Ctrl '</span>
+                </Button>
+                <Button size="sm" variant="ghost" onClick={resetCurrentSentence}>
+                  重置 <span className="ml-2 rounded border border-border/60 px-1.5 py-0.5 text-[0.65rem] text-muted-foreground">Ctrl N</span>
+                </Button>
+                <Button size="sm" variant="secondary" onClick={handleMarkMastered}>
+                  标记掌握 <span className="ml-2 rounded border border-border/60 px-1.5 py-0.5 text-[0.65rem] text-muted-foreground">Ctrl M</span>
+                </Button>
               </div>
-              <Button variant="ghost" size="icon" onClick={goNextSentence}>
-                <ChevronRight className="h-5 w-5" />
-                <span className="sr-only">下一句</span>
-              </Button>
-            </div>
-
-            {status && (
-              <Badge
-                variant="outline"
-                className={cn('rounded-full px-4 py-1 text-sm font-medium', STATUS_BADGE_STYLES[status.type])}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={goNextSentence}
+                className="flex h-12 w-12 items-center justify-center"
               >
-                {status.text}
-              </Badge>
-            )}
-
-            <div className="flex flex-wrap justify-center gap-3">
-              <Button size="sm" onClick={handleSubmit}>
-                提交
-              </Button>
-              <Button size="sm" variant="outline" onClick={handleToggleAnswer}>
-                {showAnswer ? '隐藏答案' : '显示答案'}
-              </Button>
-              <Button size="sm" variant="outline" onClick={handlePlaySound}>
-                播放声音
-              </Button>
-              <Button size="sm" variant="ghost" onClick={resetCurrentSentence}>
-                重置
-              </Button>
-              <Button size="sm" variant="secondary" onClick={handleMarkMastered}>
-                标记掌握
+                <ChevronRight className="h-6 w-6" />
+                <span className="sr-only">下一句</span>
               </Button>
             </div>
           </div>
