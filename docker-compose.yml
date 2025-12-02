@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: keymantra_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password  # 开发环境简单点，生产环境记得改
+      POSTGRES_DB: keymantra
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
