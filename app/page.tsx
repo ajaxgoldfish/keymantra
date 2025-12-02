@@ -8,7 +8,7 @@ export default function Home() {
           KeyMantra
         </h1>
         <p className="text-zinc-500">
-          基于 Zinc 风格的现代化密钥管理系统
+          熟练，才会上瘾
         </p>
       </div>
       
