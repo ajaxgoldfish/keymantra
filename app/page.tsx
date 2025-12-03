@@ -20,7 +20,9 @@ export default function Home() {
         <Button asChild>
           <Link href="/dictation">默写</Link>
         </Button>
-        <Button variant="outline">轮廓按钮 (Outline)</Button>
+        <Button asChild>
+          <Link href="/recitation">默背</Link>
+        </Button>
       </div>
     </div>
   );
