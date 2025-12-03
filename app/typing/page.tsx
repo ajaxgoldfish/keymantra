@@ -2,22 +2,23 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { getQuestions } from "./actions";
+import { getQuestionsWithAnswers } from "./actions";
 
-// 定义题目类型（也可以从 schema 导入推导）
-type Question = {
+// 定义新的数据类型
+type QuestionWithAnswer = {
   id: number;
   no: number;
   title: string;
+  answerContent: string | null;
 };
 
 export default function TypingPage() {
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<QuestionWithAnswer[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleFetchQuestions = async () => {
     setLoading(true);
-    const res = await getQuestions();
+    const res = await getQuestionsWithAnswers(); // 调用新的 action
     setLoading(false);
     
     if (res.success && res.data) {
@@ -36,25 +37,33 @@ export default function TypingPage() {
       </div>
 
       <Button onClick={handleFetchQuestions} disabled={loading}>
-        {loading ? "加载中..." : "获取所有题目"}
+        {loading ? "加载中..." : "获取所有题目及答案"}
       </Button>
 
       {/* 题目列表展示区域 */}
       <div className="w-full max-w-2xl px-4 space-y-4">
         {questions.length > 0 ? (
-          questions.map((q) => (
+          questions.map((q, index) => (
             <div 
-              key={q.id} 
-              className="p-6 bg-white rounded-xl shadow-sm border border-zinc-100 hover:shadow-md transition-shadow"
+              key={index} // 因为可能有重复题目(不同答案)，暂时用index做key
+              className="p-6 bg-white rounded-xl shadow-sm border border-zinc-100 hover:shadow-md transition-shadow space-y-3"
             >
               <div className="flex items-center gap-4">
-                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 font-bold text-sm">
+                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 font-bold text-sm shrink-0">
                   {q.no}
                 </span>
                 <p className="text-lg text-zinc-800 font-medium">
                   {q.title}
                 </p>
               </div>
+              
+              {/* 显示答案 */}
+              {q.answerContent && (
+                <div className="ml-12 p-3 bg-green-50 rounded-lg text-green-700 text-sm">
+                  <span className="font-semibold mr-2">答案:</span>
+                  {q.answerContent}
+                </div>
+              )}
             </div>
           ))
         ) : (
