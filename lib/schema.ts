@@ -13,8 +13,8 @@ export const answers = pgTable("answers", {
 
 // 新增关联表
 export const questionAnswers = pgTable("question_answers", {
-  questionId: integer("question_id").references(() => questions.id).notNull(),
-  answerId: integer("answer_id").references(() => answers.id).notNull(),
+  questionId: integer("question_id").notNull(),
+  answerId: integer("answer_id").notNull(),
 }, (t) => [
   primaryKey({ columns: [t.questionId, t.answerId] }) // 改为返回数组
 ]);
