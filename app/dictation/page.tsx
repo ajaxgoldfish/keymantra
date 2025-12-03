@@ -258,8 +258,14 @@ export default function DictationPage() {
     <div className="min-h-screen w-full flex flex-col bg-zinc-50">
       {/* 顶部导航栏 */}
       <header className="w-full p-6 flex justify-between items-center text-zinc-400">
-         <div className="font-bold text-zinc-800">KeyMantra Dictation</div>
-         <div>{currentIndex + 1} / {questions.length}</div>
+         <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="gap-2 text-zinc-500 hover:text-zinc-900">
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+           Back
+         </Button>
+         <div className="flex items-center gap-6">
+            <div className="font-bold text-zinc-800">KeyMantra Dictation</div>
+            <div>{currentIndex + 1} / {questions.length}</div>
+         </div>
       </header>
 
       {/* 主内容区 */}
