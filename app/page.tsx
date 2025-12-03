@@ -17,7 +17,9 @@ export default function Home() {
         <Button asChild>
           <Link href="/typing">打字背诵</Link>
         </Button>
-        <Button variant="secondary">次级按钮 (Secondary)</Button>
+        <Button asChild>
+          <Link href="/dictation">默写</Link>
+        </Button>
         <Button variant="outline">轮廓按钮 (Outline)</Button>
       </div>
     </div>
