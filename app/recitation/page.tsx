@@ -46,7 +46,7 @@ export default function RecitationPage() {
     setIsPressing(true);
     pressStartTimeRef.current = Date.now();
 
-    // 设置定时器，0.5s 后揭晓
+    // 设置定时器，0.3s 后揭晓
     timerRef.current = setTimeout(() => {
       setIsRevealed(true);
       setIsPressing(false);
@@ -54,7 +54,7 @@ export default function RecitationPage() {
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(50);
       }
-    }, 500);
+    }, 300);
   };
 
   const endPress = () => {
@@ -157,7 +157,7 @@ export default function RecitationPage() {
           {/* 进度条指示器 (按下时显示) */}
           {isPressing && !isRevealed && (
             <div className="absolute bottom-0 left-0 w-full h-1 bg-zinc-100 rounded-full overflow-hidden">
-               <div className="h-full bg-zinc-800 animate-[progress_0.5s_linear_forwards]" />
+               <div className="h-full bg-zinc-800 animate-[progress_0.3s_linear_forwards]" />
             </div>
           )}
         </div>
