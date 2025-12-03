@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { getQuestionsWithAnswers } from "@/app/typing/actions";
-import { Loader2, RefreshCw, CheckCircle2 } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // --- 类型定义 ---
@@ -16,33 +16,26 @@ interface WordItem {
   status: WordStatus;
 }
 
-// --- 辅助函数：计算单词宽度 ---
+// --- 辅助函数：计算单词宽度 (模拟 useDynamicWidth) ---
 const getWordWidthStyle = (text: string, placeholder: string) => {
-  // 找出较长的那个字符串作为基准宽度
   const target = text.length > placeholder.length ? text : placeholder;
-  
-  // 检测是否包含中文
   const hasChinese = /[\u4e00-\u9fa5]/.test(target);
   
   let width;
   if (hasChinese) {
-    // 中文：每个字 1.2em，确保足够宽
     width = Math.max(2, target.length * 1.2 + 1);
   } else {
-    // 英文：增加系数到 0.8，并增加基础 padding
     width = Math.max(2, target.length * 0.8 + 1);
   }
   
-  // 使用 minWidth 允许内容撑开容器，避免重叠
   return { minWidth: `${width}em` };
 };
-
 
 // --- 核心组件: DictationInput ---
 interface DictationInputProps {
   answer: string;
   onComplete?: (isCorrect: boolean) => void;
-  key?: string | number; // 用于重置
+  key?: string | number;
 }
 
 const DictationInput = ({ answer, onComplete }: DictationInputProps) => {
@@ -53,73 +46,45 @@ const DictationInput = ({ answer, onComplete }: DictationInputProps) => {
   const [activeWordIndex, setActiveWordIndex] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // 1. 解析答案为单词数组
   const correctWords = useMemo(() => {
     return answer.split(/\s+/).filter(w => w.length > 0);
   }, [answer]);
 
-  // 2. 计算当前单词状态
   const words: WordItem[] = useMemo(() => {
-    // 根据空格分割用户输入
-    // 注意：保留空字符串以便光标在空格后能跳到下一个单词
-    // 这里的逻辑比较微妙，需要匹配输入框的空格逻辑
-    
-    // 策略：
-    // 用户的 inputValue 可能像 "hello wo" -> ["hello", "wo"]
-    // 也可能像 "hello  " -> ["hello", "", ""]
-    
     const userWords = inputValue.split(/\s/); 
     
     return correctWords.map((correctText, index) => {
       const userInput = userWords[index] || "";
-      
       let status: WordStatus = 'normal';
       
       if (isSubmitted) {
-        // 提交后只看对错
-        // 忽略大小写和标点
         const cleanUser = userInput.trim().toLowerCase().replace(/[.,?!]/g, "");
         const cleanCorrect = correctText.toLowerCase().replace(/[.,?!]/g, "");
         status = cleanUser === cleanCorrect ? 'correct' : 'incorrect';
       } else {
-        // 未提交时，高亮当前编辑的单词
         if (index === activeWordIndex) {
           status = 'active';
         }
       }
 
-      return {
-        index,
-        correctText,
-        userInput,
-        status
-      };
+      return { index, correctText, userInput, status };
     });
   }, [correctWords, inputValue, activeWordIndex, isSubmitted]);
 
-  // 3. 处理输入
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVal = e.target.value;
     setInputValue(newVal);
 
-    // 计算光标位置对应的单词索引
-    // 通过统计光标前的空格数量来确定当前是第几个单词
     const cursorPosition = e.target.selectionStart || 0;
     const textBeforeCursor = newVal.slice(0, cursorPosition);
-    // 空格数量即为当前单词索引 (假设单空格分隔)
-    // 如果有连续空格，可能需要更复杂的逻辑，这里假设标准输入
     const spacesCount = textBeforeCursor.split(/\s/).length - 1;
-    
-    // 限制索引不超过单词总数
     setActiveWordIndex(Math.min(spacesCount, correctWords.length - 1));
     
-    // 重置提交状态（如果用户修改了输入）
     if (isSubmitted) {
       setIsSubmitted(false);
     }
   };
 
-  // 4. 光标同步 (点击/移动光标时更新 activeWordIndex)
   const handleSelect = (e: React.SyntheticEvent<HTMLInputElement, Event>) => {
     const target = e.currentTarget;
     const cursorPosition = target.selectionStart || 0;
@@ -128,19 +93,16 @@ const DictationInput = ({ answer, onComplete }: DictationInputProps) => {
     setActiveWordIndex(Math.min(spacesCount, correctWords.length - 1));
   };
 
-  // 5. 提交逻辑
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      if (isComposing.current) return; // IME 输入中不提交
-      
-      e.preventDefault(); // 防止换行
+      if (isComposing.current) return;
+      e.preventDefault();
       submit();
     }
   };
 
   const submit = () => {
     setIsSubmitted(true);
-    // 简单校验：所有单词都正确才算对
     const isAllCorrect = words.every(w => {
         const cleanUser = w.userInput.trim().toLowerCase().replace(/[.,?!]/g, "");
         const cleanCorrect = w.correctText.toLowerCase().replace(/[.,?!]/g, "");
@@ -152,18 +114,16 @@ const DictationInput = ({ answer, onComplete }: DictationInputProps) => {
     }
   };
 
-  // 自动聚焦
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
   return (
     <div className="relative w-full max-w-4xl mx-auto p-8 min-h-[200px]">
-      {/* --- 逻辑层: 透明 Input --- */}
       <input
         ref={inputRef}
         type="text"
-        className="absolute inset-0 w-full h-full opacity-0 cursor-text z-10 bg-transparent text-transparent caret-transparent p-8 font-mono text-lg" // padding 需要匹配视觉层
+        className="absolute inset-0 w-full h-full opacity-0 cursor-text z-10 bg-transparent text-transparent caret-transparent p-8 font-mono text-lg"
         value={inputValue}
         onChange={handleInputChange}
         onSelect={handleSelect}
@@ -174,39 +134,26 @@ const DictationInput = ({ answer, onComplete }: DictationInputProps) => {
         spellCheck={false}
       />
 
-      {/* --- 视觉层: 单词渲染 --- */}
-      {/* 必须要加 pointer-events-none，让点击穿透到 input 上 */}
       <div className="relative z-0 flex flex-wrap justify-center gap-x-4 gap-y-8 pointer-events-none">
         {words.map((word) => (
           <div
             key={word.index}
             className={cn(
               "relative flex items-end justify-center h-[4rem] border-b-2 transition-all duration-200 px-2",
-              // 动态宽度样式在 style 中设置
-              
-              // 状态样式
               word.status === 'normal' && "border-zinc-200 text-zinc-400",
               word.status === 'active' && "border-fuchsia-500 text-fuchsia-500 scale-110",
               word.status === 'correct' && "border-green-500 text-green-600",
-              word.status === 'incorrect' && "border-red-500 text-red-500 animate-in fade-in shake", // 需要定义 shake 动画
+              word.status === 'incorrect' && "border-red-500 text-red-500 animate-in fade-in shake",
             )}
             style={getWordWidthStyle(word.correctText, word.userInput)}
           >
-            {/* 显示的文字 */}
-            {/* 加上 whitespace-nowrap 强制不换行 */}
             <span className="text-[3em] leading-none font-sans pb-1 whitespace-nowrap">
-              {/* 如果用户没输入，可以显示占位符或空 */}
-              {/* 这里的逻辑：显示用户输入的内容。如果没输入且不是当前激活，可以不显示 */}
               {word.userInput}
             </span>
-
-            {/* 占位提示（可选：显示正确长度的下划线或阴影字符） */}
-            {/* 比如：当用户未输入时，显示浅色的正确单词轮廓？或者什么都不显示 */}
           </div>
         ))}
       </div>
       
-      {/* 辅助提示 */}
       <div className="absolute bottom-2 right-4 text-zinc-300 text-sm pointer-events-none">
          {activeWordIndex + 1} / {correctWords.length}
       </div>
@@ -220,7 +167,11 @@ export default function DictationPage() {
   const [questions, setQuestions] = useState<{id: number, title: string, answerContent: string | null}[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [pageState, setPageState] = useState<'answering' | 'result'>('answering');
+
+  // --- 长按揭晓状态 ---
+  const [isPressing, setIsPressing] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -233,16 +184,46 @@ export default function DictationPage() {
     loadData();
   }, []);
 
+  // 重置长按状态
+  useEffect(() => {
+    setIsRevealed(false);
+    setIsPressing(false);
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, [currentIndex]);
+
+  const startPress = () => {
+    if (isRevealed) return;
+    setIsPressing(true);
+    timerRef.current = setTimeout(() => {
+      setIsRevealed(true);
+      setIsPressing(false);
+    }, 200);
+  };
+
+  const endPress = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    setIsPressing(false);
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+    }
+  };
+
   const handleComplete = (isCorrect: boolean) => {
       if (isCorrect) {
-          // 稍微延迟后自动下一题
           setTimeout(() => {
-              if (currentIndex < questions.length - 1) {
-                  setCurrentIndex(prev => prev + 1);
-                  // 由于 input 是内部状态，切换 key 可以强制重置组件
-              } else {
-                  alert("恭喜！所有题目已完成！");
-              }
+              handleNext();
           }, 1000);
       }
   };
@@ -251,12 +232,21 @@ export default function DictationPage() {
   if (questions.length === 0) return <div className="flex h-screen items-center justify-center">暂无题目</div>;
 
   const currentQuestion = questions[currentIndex];
-  // 确保有答案，否则无法进行
+  
+  // 防御性检查：防止索引越界
+  if (!currentQuestion) {
+     return (
+        <div className="flex h-screen flex-col items-center justify-center gap-4">
+            <div className="text-2xl font-bold">All Done! 🎉</div>
+            <Button onClick={() => window.history.back()}>Go Back</Button>
+        </div>
+     );
+  }
+
   const currentAnswer = currentQuestion.answerContent || "No Answer Provided";
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-zinc-50">
-      {/* 顶部导航栏 */}
+    <div className="min-h-screen w-full flex flex-col bg-zinc-50 select-none">
       <header className="w-full p-6 flex justify-between items-center text-zinc-400">
          <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="gap-2 text-zinc-500 hover:text-zinc-900">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
@@ -268,10 +258,8 @@ export default function DictationPage() {
          </div>
       </header>
 
-      {/* 主内容区 */}
       <main className="flex-1 flex flex-col items-center justify-center gap-12 pb-32">
         
-        {/* 题目展示 */}
         <div className="text-center space-y-4 px-4">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-zinc-900">
               {currentQuestion.title}
@@ -281,21 +269,86 @@ export default function DictationPage() {
             </p>
         </div>
 
-        {/* 输入组件 */}
-        {/* 使用 key={currentIndex} 确保切换题目时 Input 组件完全重置 */}
+        {/* --- 新增：长按提示答案区域 --- */}
+        <div 
+          className="relative group cursor-pointer select-none"
+          onMouseDown={startPress}
+          onMouseUp={endPress}
+          onMouseLeave={endPress}
+          onTouchStart={startPress}
+          onTouchEnd={endPress}
+        >
+            <div className={cn(
+                "px-6 py-3 rounded-xl bg-white/50 border border-zinc-200/50 shadow-sm transition-all duration-300 min-w-[200px] text-center backdrop-blur-sm",
+                isPressing && "bg-white scale-95 border-zinc-300",
+                isRevealed && "bg-green-50 border-green-200"
+            )}>
+                <div className={cn(
+                    "text-lg font-medium transition-all duration-300",
+                    isRevealed ? "text-green-700 blur-0" : "text-zinc-400 blur-sm",
+                    isPressing && !isRevealed && "blur-[2px]"
+                )}>
+                    {currentAnswer}
+                </div>
+                
+                {!isRevealed && (
+                    <div className={cn(
+                        "absolute inset-0 flex items-center justify-center text-xs text-zinc-400 font-medium uppercase tracking-wider transition-opacity",
+                        isPressing ? "opacity-0" : "opacity-100"
+                    )}>
+                        Hold for hint
+                    </div>
+                )}
+
+                {/* 进度条 */}
+                {isPressing && !isRevealed && (
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-zinc-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-zinc-400 animate-[progress_0.2s_linear_forwards]" />
+                    </div>
+                )}
+            </div>
+        </div>
+
         <DictationInput 
             key={currentIndex} 
             answer={currentAnswer} 
             onComplete={handleComplete}
         />
         
-        {/* 操作提示 */}
-        <div className="flex gap-4 text-zinc-400 text-sm">
-            <span className="flex items-center gap-1"><span className="border rounded px-1 bg-white">Space</span> next word</span>
-            <span className="flex items-center gap-1"><span className="border rounded px-1 bg-white">Enter</span> check</span>
+        <div className="flex items-center gap-8 mt-8">
+           <Button 
+             variant="outline" 
+             size="icon" 
+             onClick={handlePrev} 
+             disabled={currentIndex === 0}
+             className="rounded-full w-12 h-12"
+           >
+             <ChevronLeft className="w-6 h-6" />
+           </Button>
+           
+           <span className="text-zinc-400 font-mono">
+             {currentIndex + 1} / {questions.length}
+           </span>
+
+           <Button 
+             variant="outline" 
+             size="icon" 
+             onClick={handleNext} 
+             disabled={currentIndex === questions.length - 1}
+             className="rounded-full w-12 h-12"
+           >
+             <ChevronRight className="w-6 h-6" />
+           </Button>
         </div>
 
       </main>
+      
+      <style jsx global>{`
+        @keyframes progress {
+          from { width: 0%; }
+          to { width: 100%; }
+        }
+      `}</style>
     </div>
   );
 }
