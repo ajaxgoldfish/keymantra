@@ -16,18 +16,22 @@ interface WordItem {
   status: WordStatus;
 }
 
-// --- 辅助函数：计算单词宽度 (模拟 useDynamicWidth) ---
-// 简单策略：根据字符数估算，或者用更精细的字典
+// --- 辅助函数：计算单词宽度 ---
 const getWordWidthStyle = (text: string, placeholder: string) => {
   // 找出较长的那个字符串作为基准宽度
   const target = text.length > placeholder.length ? text : placeholder;
   
-  // 简单的估算：普通字母 0.6ch，宽字母(m, w) 0.9ch，窄字母(i, l) 0.3ch
-  // 也可以直接用 ch 单位，更简单
-  // 这里我们给每个字符分配大约 0.8em 的空间，外加一点 padding
-  const length = target.length;
-  // 最小宽度 2em
-  const width = Math.max(2, length * 0.7 + 0.5); 
+  // 检测是否包含中文
+  const hasChinese = /[\u4e00-\u9fa5]/.test(target);
+  
+  let width;
+  if (hasChinese) {
+    // 中文：每个字 1em，两边留白多一点
+    width = Math.max(2, target.length * 1.1 + 0.5);
+  } else {
+    // 英文：维持原有逻辑
+    width = Math.max(2, target.length * 0.7 + 0.5);
+  }
   
   return { width: `${width}em` };
 };
@@ -188,7 +192,8 @@ const DictationInput = ({ answer, onComplete }: DictationInputProps) => {
             style={getWordWidthStyle(word.correctText, word.userInput)}
           >
             {/* 显示的文字 */}
-            <span className="text-[3em] leading-none font-sans pb-1">
+            {/* 加上 whitespace-nowrap 强制不换行 */}
+            <span className="text-[3em] leading-none font-sans pb-1 whitespace-nowrap">
               {/* 如果用户没输入，可以显示占位符或空 */}
               {/* 这里的逻辑：显示用户输入的内容。如果没输入且不是当前激活，可以不显示 */}
               {word.userInput}
