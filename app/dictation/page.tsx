@@ -26,14 +26,15 @@ const getWordWidthStyle = (text: string, placeholder: string) => {
   
   let width;
   if (hasChinese) {
-    // 中文：每个字 1em，两边留白多一点
-    width = Math.max(2, target.length * 1.1 + 0.5);
+    // 中文：每个字 1.2em，确保足够宽
+    width = Math.max(2, target.length * 1.2 + 1);
   } else {
-    // 英文：维持原有逻辑
-    width = Math.max(2, target.length * 0.7 + 0.5);
+    // 英文：增加系数到 0.8，并增加基础 padding
+    width = Math.max(2, target.length * 0.8 + 1);
   }
   
-  return { width: `${width}em` };
+  // 使用 minWidth 允许内容撑开容器，避免重叠
+  return { minWidth: `${width}em` };
 };
 
 
@@ -180,7 +181,7 @@ const DictationInput = ({ answer, onComplete }: DictationInputProps) => {
           <div
             key={word.index}
             className={cn(
-              "relative flex items-end justify-center h-[4rem] border-b-2 transition-all duration-200",
+              "relative flex items-end justify-center h-[4rem] border-b-2 transition-all duration-200 px-2",
               // 动态宽度样式在 style 中设置
               
               // 状态样式
