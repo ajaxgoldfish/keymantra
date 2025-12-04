@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { questions, answers, questionAnswers, courseQuestions, courses } from "@/lib/schema";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, max } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getCourses() {
@@ -12,6 +12,17 @@ export async function getCourses() {
   } catch (error) {
     console.error("获取课程失败:", error);
     return { success: false, error: "获取课程失败" };
+  }
+}
+
+export async function getCourse(courseId: number) {
+  try {
+    const result = await db.select().from(courses).where(eq(courses.id, courseId));
+    if (result.length === 0) return { success: false, error: "课程不存在" };
+    return { success: true, data: result[0] };
+  } catch (error) {
+    console.error("获取课程详情失败:", error);
+    return { success: false, error: "获取课程详情失败" };
   }
 }
 
@@ -66,5 +77,59 @@ export async function getQuestionsWithAnswers(courseId: number = 1) {
   } catch (error) {
     console.error("获取题目失败:", error);
     return { success: false, error: "获取题目失败" };
+  }
+}
+
+export async function createQuestion(courseId: number, title: string, answerContent: string) {
+  try {
+    return await db.transaction(async (tx) => {
+      // 1. 创建题目
+      const [newQuestion] = await tx.insert(questions).values({ title }).returning({ id: questions.id });
+      
+      // 2. 创建答案
+      const [newAnswer] = await tx.insert(answers).values({ content: answerContent }).returning({ id: answers.id });
+      
+      // 3. 关联题目-答案
+      await tx.insert(questionAnswers).values({
+        questionId: newQuestion.id,
+        answerId: newAnswer.id,
+      });
+
+      // 4. 获取当前课程最大序号
+      const maxOrderResult = await tx
+        .select({ maxOrder: max(courseQuestions.sortOrder) })
+        .from(courseQuestions)
+        .where(eq(courseQuestions.courseId, courseId));
+      
+      const nextOrder = (maxOrderResult[0]?.maxOrder ?? 0) + 1;
+
+      // 5. 关联题目-课程
+      await tx.insert(courseQuestions).values({
+        courseId: courseId,
+        questionId: newQuestion.id,
+        sortOrder: nextOrder,
+      });
+
+      revalidatePath(`/courses/${courseId}/edit`);
+      return { success: true };
+    });
+  } catch (error) {
+    console.error("创建题目失败:", error);
+    return { success: false, error: "创建题目失败" };
+  }
+}
+
+export async function deleteQuestionFromCourse(courseId: number, questionId: number) {
+  try {
+    await db.delete(courseQuestions)
+      .where(
+        eq(courseQuestions.courseId, courseId) && 
+        eq(courseQuestions.questionId, questionId)
+      );
+    revalidatePath(`/courses/${courseId}/edit`);
+    return { success: true };
+  } catch (error) {
+    console.error("删除题目失败:", error);
+    return { success: false, error: "删除题目失败" };
   }
 }
