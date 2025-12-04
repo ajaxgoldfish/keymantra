@@ -28,7 +28,7 @@ export default function DictationCourseSelectPage() {
   return (
      <div className="min-h-screen w-full flex flex-col bg-zinc-50 select-none">
        <header className="w-full p-6 flex justify-between items-center text-zinc-400">
-          <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="gap-2 text-zinc-500 hover:text-zinc-900">
+          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="gap-2 text-zinc-500 hover:text-zinc-900">
               <ChevronLeft className="w-4 h-4" /> Back
           </Button>
           <div className="font-bold text-zinc-800">KeyMantra Dictation</div>
