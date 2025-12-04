@@ -36,3 +36,19 @@ export const courseQuestions = pgTable("course_questions", {
 }, (t) => [
   primaryKey({ columns: [t.courseId, t.questionId] })
 ]);
+
+// 6. 用户表
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+});
+
+// 7. 用户-课程关联表
+export const userCourses = pgTable("user_courses", {
+  userId: integer("user_id").notNull(),
+  courseId: integer("course_id").notNull(),
+}, (t) => [
+  primaryKey({ columns: [t.userId, t.courseId] })
+]);
