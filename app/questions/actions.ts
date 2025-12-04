@@ -1,13 +1,27 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { questions, answers, questionAnswers, courseQuestions, courses } from "@/lib/schema";
-import { eq, asc, max } from "drizzle-orm";
+import { questions, answers, questionAnswers, courseQuestions, courses, userCourses } from "@/lib/schema";
+import { eq, asc, max, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { auth } from "@clerk/nextjs/server";
 
 export async function getCourses() {
   try {
-    const result = await db.select().from(courses).orderBy(asc(courses.id));
+    const { userId } = await auth();
+    if (!userId) return { success: false, error: "未登录" };
+
+    const result = await db
+      .select({
+        id: courses.id,
+        name: courses.name,
+        description: courses.description,
+      })
+      .from(courses)
+      .innerJoin(userCourses, eq(courses.id, userCourses.courseId))
+      .where(eq(userCourses.userId, userId))
+      .orderBy(asc(courses.id));
+      
     return { success: true, data: result };
   } catch (error) {
     console.error("获取课程失败:", error);
@@ -17,6 +31,15 @@ export async function getCourses() {
 
 export async function getCourse(courseId: number) {
   try {
+    const { userId } = await auth();
+    if (!userId) return { success: false, error: "未登录" };
+
+    // 检查权限
+    const hasAccess = await db.select().from(userCourses)
+      .where(and(eq(userCourses.userId, userId), eq(userCourses.courseId, courseId)));
+    
+    if (hasAccess.length === 0) return { success: false, error: "无权访问该课程" };
+
     const result = await db.select().from(courses).where(eq(courses.id, courseId));
     if (result.length === 0) return { success: false, error: "课程不存在" };
     return { success: true, data: result[0] };
@@ -28,12 +51,23 @@ export async function getCourse(courseId: number) {
 
 export async function createCourse(name: string, description: string | null) {
   try {
-    await db.insert(courses).values({
-      name,
-      description,
+    const { userId } = await auth();
+    if (!userId) return { success: false, error: "未登录" };
+
+    return await db.transaction(async (tx) => {
+      const [newCourse] = await tx.insert(courses).values({
+        name,
+        description,
+      }).returning({ id: courses.id });
+
+      await tx.insert(userCourses).values({
+        userId,
+        courseId: newCourse.id
+      });
+
+      revalidatePath("/courses");
+      return { success: true };
     });
-    revalidatePath("/courses");
-    return { success: true };
   } catch (error) {
     console.error("创建课程失败:", error);
     return { success: false, error: "创建课程失败" };
@@ -42,14 +76,28 @@ export async function createCourse(name: string, description: string | null) {
 
 export async function deleteCourse(courseId: number) {
   try {
-    // 1. 删除课程关联的题目关系 (可选：是否要级联删除题目本身？目前只删除关联)
-    await db.delete(courseQuestions).where(eq(courseQuestions.courseId, courseId));
+    const { userId } = await auth();
+    if (!userId) return { success: false, error: "未登录" };
+
+    // 验证所有权
+    const hasAccess = await db.select().from(userCourses)
+      .where(and(eq(userCourses.userId, userId), eq(userCourses.courseId, courseId)));
     
-    // 2. 删除课程
-    await db.delete(courses).where(eq(courses.id, courseId));
-    
-    revalidatePath("/courses");
-    return { success: true };
+    if (hasAccess.length === 0) return { success: false, error: "无权删除该课程" };
+
+    return await db.transaction(async (tx) => {
+        // 1. 删除用户关联
+        await tx.delete(userCourses).where(eq(userCourses.courseId, courseId));
+
+        // 2. 删除课程关联的题目关系
+        await tx.delete(courseQuestions).where(eq(courseQuestions.courseId, courseId));
+        
+        // 3. 删除课程
+        await tx.delete(courses).where(eq(courses.id, courseId));
+        
+        revalidatePath("/courses");
+        return { success: true };
+    });
   } catch (error) {
     console.error("删除课程失败:", error);
     return { success: false, error: "删除课程失败" };
@@ -58,6 +106,14 @@ export async function deleteCourse(courseId: number) {
 
 export async function getQuestionsWithAnswers(courseId: number) {
   try {
+    const { userId } = await auth();
+    if (!userId) return { success: false, error: "未登录" };
+    
+    // 简单验证权限 (也可以不做，因为 getQuestionsWithAnswers 通常在 getCourse 之后调用，但为了安全最好加上)
+    const hasAccess = await db.select().from(userCourses)
+      .where(and(eq(userCourses.userId, userId), eq(userCourses.courseId, courseId)));
+    if (hasAccess.length === 0) return { success: false, error: "无权访问该课程" };
+
     // 从课程关联表中查询，并按 sortOrder 排序
     const result = await db
       .select({
@@ -82,6 +138,14 @@ export async function getQuestionsWithAnswers(courseId: number) {
 
 export async function createQuestion(courseId: number, title: string, answerContent: string) {
   try {
+    const { userId } = await auth();
+    if (!userId) return { success: false, error: "未登录" };
+    
+    // 验证权限
+    const hasAccess = await db.select().from(userCourses)
+       .where(and(eq(userCourses.userId, userId), eq(userCourses.courseId, courseId)));
+    if (hasAccess.length === 0) return { success: false, error: "无权操作" };
+
     return await db.transaction(async (tx) => {
       // 1. 创建题目
       const [newQuestion] = await tx.insert(questions).values({ title }).returning({ id: questions.id });
@@ -121,10 +185,20 @@ export async function createQuestion(courseId: number, title: string, answerCont
 
 export async function deleteQuestionFromCourse(courseId: number, questionId: number) {
   try {
+     const { userId } = await auth();
+    if (!userId) return { success: false, error: "未登录" };
+    
+    // 验证权限
+    const hasAccess = await db.select().from(userCourses)
+       .where(and(eq(userCourses.userId, userId), eq(userCourses.courseId, courseId)));
+    if (hasAccess.length === 0) return { success: false, error: "无权操作" };
+
     await db.delete(courseQuestions)
       .where(
-        eq(courseQuestions.courseId, courseId) && 
-        eq(courseQuestions.questionId, questionId)
+        and(
+            eq(courseQuestions.courseId, courseId), 
+            eq(courseQuestions.questionId, questionId)
+        )
       );
     revalidatePath(`/courses/${courseId}/edit`);
     return { success: true };

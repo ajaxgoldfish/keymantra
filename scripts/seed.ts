@@ -1,13 +1,15 @@
 import "dotenv/config";
 import { sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { questions, answers, questionAnswers, courses, courseQuestions } from "@/lib/schema";
+import { questions, answers, questionAnswers, courses, courseQuestions, users, userCourses } from "@/lib/schema";
 
 async function seed() {
   try {
     console.log("🗑️  正在清空旧数据...");
 
     // 清空表 (注意顺序)
+    await db.execute(sql`TRUNCATE TABLE ${userCourses} CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE ${users} CASCADE`);
     await db.execute(sql`TRUNCATE TABLE ${courseQuestions} CASCADE`);
     await db.execute(sql`TRUNCATE TABLE ${questionAnswers} CASCADE`);
     await db.execute(sql`TRUNCATE TABLE ${questions} RESTART IDENTITY CASCADE`);
