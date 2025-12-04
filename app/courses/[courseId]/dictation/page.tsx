@@ -250,7 +250,7 @@ export default function DictationPage() {
       return (
         <div className="flex h-screen flex-col items-center justify-center gap-4">
             <div className="text-zinc-500">该课程暂无题目</div>
-            <Button onClick={() => router.push('/dictation')}>返回课程列表</Button>
+            <Button onClick={() => router.push('/courses')}>返回课程列表</Button>
         </div>
       );
   }
@@ -262,7 +262,7 @@ export default function DictationPage() {
      return (
         <div className="flex h-screen flex-col items-center justify-center gap-4">
             <div className="text-2xl font-bold">All Done! 🎉</div>
-            <Button onClick={() => router.push('/dictation')}>Back to Courses</Button>
+            <Button onClick={() => router.push('/courses')}>Back to Courses</Button>
         </div>
      );
   }
@@ -273,7 +273,7 @@ export default function DictationPage() {
   return (
     <div className="min-h-screen w-full flex flex-col bg-zinc-50 select-none">
       <header className="w-full p-6 flex justify-between items-center text-zinc-400">
-         <Button variant="ghost" size="sm" onClick={() => router.push('/dictation')} className="gap-2 text-zinc-500 hover:text-zinc-900">
+         <Button variant="ghost" size="sm" onClick={() => router.push('/courses')} className="gap-2 text-zinc-500 hover:text-zinc-900">
            <ChevronLeft className="w-4 h-4" /> Courses
          </Button>
          <div className="flex items-center gap-6">

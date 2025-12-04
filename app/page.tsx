@@ -18,10 +18,7 @@ export default function Home() {
           <Link href="/typing">打字背诵</Link>
         </Button>
         <Button asChild>
-          <Link href="/dictation">默写</Link>
-        </Button>
-        <Button asChild>
-          <Link href="/recitation">默背</Link>
+          <Link href="/courses">默写默背</Link>
         </Button>
       </div>
     </div>

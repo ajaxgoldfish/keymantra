@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { getCourses } from "@/app/typing/actions";
-import { ChevronLeft, Loader2 } from "lucide-react";
+import { ChevronLeft, Loader2, PenTool, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function RecitationCourseSelectPage() {
+export default function CoursesPage() {
   const [coursesList, setCoursesList] = useState<{id: number, name: string, description: string | null}[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -31,7 +31,7 @@ export default function RecitationCourseSelectPage() {
           <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="gap-2 text-zinc-500 hover:text-zinc-900">
               <ChevronLeft className="w-4 h-4" /> Back
           </Button>
-          <div className="font-bold text-zinc-800">KeyMantra Recitation</div>
+          <div className="font-bold text-zinc-800">KeyMantra Courses</div>
        </header>
        <main className="flex-1 container mx-auto px-4 py-8 flex flex-col items-center">
           <h1 className="text-3xl font-bold text-zinc-900 mb-8">Select a Course</h1>
@@ -40,20 +40,37 @@ export default function RecitationCourseSelectPage() {
           ) : (
               <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full max-w-5xl">
                   {coursesList.map(course => (
-                      <button 
+                      <div 
                           key={course.id}
-                          onClick={() => router.push(`/recitation/${course.id}`)}
-                          className="flex flex-col items-start p-8 bg-white rounded-2xl shadow-sm border border-zinc-200 hover:border-blue-300 hover:shadow-md hover:scale-[1.02] transition-all text-left group"
+                          className="flex flex-col p-8 bg-white rounded-2xl shadow-sm border border-zinc-200 transition-all hover:shadow-md"
                       >
-                          <div className="text-xl font-bold text-zinc-900 group-hover:text-blue-600 transition-colors mb-3">
-                              {course.name}
+                          <div className="flex-1">
+                            <div className="text-xl font-bold text-zinc-900 mb-3">
+                                {course.name}
+                            </div>
+                            {course.description && (
+                                <div className="text-zinc-500 text-sm line-clamp-3 leading-relaxed mb-6">
+                                    {course.description}
+                                </div>
+                            )}
                           </div>
-                          {course.description && (
-                              <div className="text-zinc-500 text-sm line-clamp-3 leading-relaxed">
-                                  {course.description}
-                              </div>
-                          )}
-                      </button>
+                          
+                          <div className="flex gap-3 mt-4 pt-4 border-t border-zinc-100">
+                             <Button 
+                                className="flex-1 gap-2" 
+                                variant="outline"
+                                onClick={() => router.push(`/courses/${course.id}/recitation`)}
+                             >
+                                <BookOpen className="w-4 h-4" /> 默背
+                             </Button>
+                             <Button 
+                                className="flex-1 gap-2" 
+                                onClick={() => router.push(`/courses/${course.id}/dictation`)}
+                             >
+                                <PenTool className="w-4 h-4" /> 默写
+                             </Button>
+                          </div>
+                      </div>
                   ))}
               </div>
           )}
@@ -61,3 +78,4 @@ export default function RecitationCourseSelectPage() {
      </div>
   );
 }
+
