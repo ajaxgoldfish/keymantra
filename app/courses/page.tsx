@@ -78,7 +78,7 @@ export default function CoursesPage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => console.log("Manage questions clicked")}>
+                                <DropdownMenuItem onClick={() => router.push(`/courses/${course.id}/edit`)}>
                                   <Settings className="mr-2 h-4 w-4" />
                                   <span>Manage Questions</span>
                                 </DropdownMenuItem>
