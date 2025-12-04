@@ -53,76 +53,79 @@ export default function CoursesPage() {
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
              <div className="font-bold text-zinc-800">KeyMantra Courses</div>
           </div>
-
-          <Button size="sm" onClick={() => router.push('/courses/new')} className="gap-2 z-10">
-              <Plus className="w-4 h-4" /> Add Course
-          </Button>
        </header>
        <main className="flex-1 container mx-auto px-4 py-8 flex flex-col items-center">
           <h1 className="text-3xl font-bold text-zinc-900 mb-8">Select a Course</h1>
-          {coursesList.length === 0 ? (
-              <div className="text-center text-zinc-500">暂无课程数据</div>
-          ) : (
-              <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full max-w-5xl">
-                  {coursesList.map(course => (
-                      <div 
-                          key={course.id}
-                          className="flex flex-col p-8 bg-white rounded-2xl shadow-sm border border-zinc-200 transition-all hover:shadow-md relative group"
-                      >
-                          {/* 右上角更多操作按钮 */}
-                          <div className="absolute top-4 right-4 transition-opacity">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon-sm" className="h-8 w-8 rounded-full hover:bg-zinc-100">
-                                  <MoreVertical className="h-4 w-4 text-zinc-500" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => router.push(`/courses/${course.id}/edit`)}>
-                                  <Settings className="mr-2 h-4 w-4" />
-                                  <span>Manage Questions</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => handleDelete(course.id)}
-                                  className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  <span>Delete Course</span>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-
-                          <div className="flex-1">
-                            <div className="text-xl font-bold text-zinc-900 mb-3 pr-8">
-                                {course.name}
-                            </div>
-                            {course.description && (
-                                <div className="text-zinc-500 text-sm line-clamp-3 leading-relaxed mb-6">
-                                    {course.description}
-                                </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex gap-3 mt-4 pt-4 border-t border-zinc-100">
-                             <Button 
-                                className="flex-1 gap-2" 
-                                variant="outline"
-                                onClick={() => router.push(`/courses/${course.id}/recitation`)}
-                             >
-                                <BookOpen className="w-4 h-4" /> 默背
-                             </Button>
-                             <Button 
-                                className="flex-1 gap-2" 
-                                onClick={() => router.push(`/courses/${course.id}/dictation`)}
-                             >
-                                <PenTool className="w-4 h-4" /> 默写
-                             </Button>
-                          </div>
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full max-w-5xl">
+              {coursesList.map(course => (
+                  <div 
+                      key={course.id}
+                      className="flex flex-col p-8 bg-white rounded-2xl shadow-sm border border-zinc-200 transition-all hover:shadow-md relative group"
+                  >
+                      {/* 右上角更多操作按钮 */}
+                      <div className="absolute top-4 right-4 transition-opacity">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon-sm" className="h-8 w-8 rounded-full hover:bg-zinc-100">
+                              <MoreVertical className="h-4 w-4 text-zinc-500" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => router.push(`/courses/${course.id}/edit`)}>
+                              <Settings className="mr-2 h-4 w-4" />
+                              <span>Manage Questions</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDelete(course.id)}
+                              className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              <span>Delete Course</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                  ))}
+
+                      <div className="flex-1">
+                        <div className="text-xl font-bold text-zinc-900 mb-3 pr-8">
+                            {course.name}
+                        </div>
+                        {course.description && (
+                            <div className="text-zinc-500 text-sm line-clamp-3 leading-relaxed mb-6">
+                                {course.description}
+                            </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex gap-3 mt-4 pt-4 border-t border-zinc-100">
+                          <Button 
+                            className="flex-1 gap-2" 
+                            variant="outline"
+                            onClick={() => router.push(`/courses/${course.id}/recitation`)}
+                          >
+                            <BookOpen className="w-4 h-4" /> 默背
+                          </Button>
+                          <Button 
+                            className="flex-1 gap-2" 
+                            onClick={() => router.push(`/courses/${course.id}/dictation`)}
+                          >
+                            <PenTool className="w-4 h-4" /> 默写
+                          </Button>
+                      </div>
+                  </div>
+              ))}
+
+              {/* Add Course Card */}
+              <div 
+                onClick={() => router.push('/courses/new')}
+                className="flex flex-col items-center justify-center p-8 bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-300 hover:border-zinc-400 hover:bg-zinc-100 transition-all cursor-pointer min-h-[200px] group"
+              >
+                <div className="h-12 w-12 rounded-full bg-zinc-200 flex items-center justify-center mb-4 group-hover:bg-white group-hover:shadow-sm transition-all">
+                  <Plus className="w-6 h-6 text-zinc-500 group-hover:text-zinc-700" />
+                </div>
+                <span className="text-zinc-500 font-medium group-hover:text-zinc-700">Create New Course</span>
               </div>
-          )}
+          </div>
        </main>
      </div>
   );
