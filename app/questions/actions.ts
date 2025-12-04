@@ -29,6 +29,22 @@ export async function createCourse(name: string, description: string | null) {
   }
 }
 
+export async function deleteCourse(courseId: number) {
+  try {
+    // 1. 删除课程关联的题目关系 (可选：是否要级联删除题目本身？目前只删除关联)
+    await db.delete(courseQuestions).where(eq(courseQuestions.courseId, courseId));
+    
+    // 2. 删除课程
+    await db.delete(courses).where(eq(courses.id, courseId));
+    
+    revalidatePath("/courses");
+    return { success: true };
+  } catch (error) {
+    console.error("删除课程失败:", error);
+    return { success: false, error: "删除课程失败" };
+  }
+}
+
 export async function getQuestionsWithAnswers(courseId: number = 1) {
   try {
     // 从课程关联表中查询，并按 sortOrder 排序

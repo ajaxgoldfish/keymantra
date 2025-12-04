@@ -2,26 +2,44 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { getCourses } from "@/app/questions/actions";
-import { ChevronLeft, Loader2, PenTool, BookOpen, Plus } from "lucide-react";
+import { getCourses, deleteCourse } from "@/app/questions/actions";
+import { ChevronLeft, Loader2, PenTool, BookOpen, Plus, MoreVertical, Trash2, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function CoursesPage() {
   const [coursesList, setCoursesList] = useState<{id: number, name: string, description: string | null}[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const loadCourses = async () => {
+    setLoading(true);
+    const res = await getCourses();
+    if (res.success && res.data) {
+      setCoursesList(res.data);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const loadCourses = async () => {
-      setLoading(true);
-      const res = await getCourses();
-      if (res.success && res.data) {
-        setCoursesList(res.data);
-      }
-      setLoading(false);
-    };
     loadCourses();
   }, []);
+
+  const handleDelete = async (courseId: number) => {
+    if (confirm("Are you sure you want to delete this course? This action cannot be undone.")) {
+      const res = await deleteCourse(courseId);
+      if (res.success) {
+        loadCourses(); // Reload list
+      } else {
+        alert("Failed to delete course");
+      }
+    }
+  };
 
   if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin" /></div>;
 
@@ -49,10 +67,34 @@ export default function CoursesPage() {
                   {coursesList.map(course => (
                       <div 
                           key={course.id}
-                          className="flex flex-col p-8 bg-white rounded-2xl shadow-sm border border-zinc-200 transition-all hover:shadow-md"
+                          className="flex flex-col p-8 bg-white rounded-2xl shadow-sm border border-zinc-200 transition-all hover:shadow-md relative group"
                       >
+                          {/* 右上角更多操作按钮 */}
+                          <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon-sm" className="h-8 w-8 rounded-full hover:bg-zinc-100">
+                                  <MoreVertical className="h-4 w-4 text-zinc-500" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => console.log("Manage questions clicked")}>
+                                  <Settings className="mr-2 h-4 w-4" />
+                                  <span>Manage Questions</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => handleDelete(course.id)}
+                                  className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  <span>Delete Course</span>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+
                           <div className="flex-1">
-                            <div className="text-xl font-bold text-zinc-900 mb-3">
+                            <div className="text-xl font-bold text-zinc-900 mb-3 pr-8">
                                 {course.name}
                             </div>
                             {course.description && (
@@ -85,4 +127,3 @@ export default function CoursesPage() {
      </div>
   );
 }
-
