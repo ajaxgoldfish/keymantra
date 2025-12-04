@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { getCourses } from "@/app/questions/actions";
-import { ChevronLeft, Loader2, PenTool, BookOpen } from "lucide-react";
+import { ChevronLeft, Loader2, PenTool, BookOpen, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function CoursesPage() {
@@ -27,11 +27,18 @@ export default function CoursesPage() {
 
   return (
      <div className="min-h-screen w-full flex flex-col bg-zinc-50 select-none">
-       <header className="w-full p-6 flex justify-between items-center text-zinc-400">
-          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="gap-2 text-zinc-500 hover:text-zinc-900">
+       <header className="w-full p-6 flex items-center justify-between text-zinc-400 relative">
+          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="gap-2 text-zinc-500 hover:text-zinc-900 z-10">
               <ChevronLeft className="w-4 h-4" /> Back
           </Button>
-          <div className="font-bold text-zinc-800">KeyMantra Courses</div>
+          
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+             <div className="font-bold text-zinc-800">KeyMantra Courses</div>
+          </div>
+
+          <Button size="sm" onClick={() => router.push('/courses/new')} className="gap-2 z-10">
+              <Plus className="w-4 h-4" /> Add Course
+          </Button>
        </header>
        <main className="flex-1 container mx-auto px-4 py-8 flex flex-col items-center">
           <h1 className="text-3xl font-bold text-zinc-900 mb-8">Select a Course</h1>

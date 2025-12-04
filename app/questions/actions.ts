@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { questions, answers, questionAnswers, courseQuestions, courses } from "@/lib/schema";
 import { eq, asc } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 export async function getCourses() {
   try {
@@ -11,6 +12,20 @@ export async function getCourses() {
   } catch (error) {
     console.error("获取课程失败:", error);
     return { success: false, error: "获取课程失败" };
+  }
+}
+
+export async function createCourse(name: string, description: string | null) {
+  try {
+    await db.insert(courses).values({
+      name,
+      description,
+    });
+    revalidatePath("/courses");
+    return { success: true };
+  } catch (error) {
+    console.error("创建课程失败:", error);
+    return { success: false, error: "创建课程失败" };
   }
 }
 
