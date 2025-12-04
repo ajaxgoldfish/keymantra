@@ -15,9 +15,6 @@ export default function Home() {
       
       <div className="flex gap-4">
         <Button asChild>
-          <Link href="/questions">获取所有题目</Link>
-        </Button>
-        <Button asChild>
           <Link href="/courses">默写默背</Link>
         </Button>
       </div>

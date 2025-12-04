@@ -56,7 +56,7 @@ export async function deleteCourse(courseId: number) {
   }
 }
 
-export async function getQuestionsWithAnswers(courseId: number = 1) {
+export async function getQuestionsWithAnswers(courseId: number) {
   try {
     // 从课程关联表中查询，并按 sortOrder 排序
     const result = await db
