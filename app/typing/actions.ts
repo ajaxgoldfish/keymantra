@@ -1,8 +1,18 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { questions, answers, questionAnswers, courseQuestions } from "@/lib/schema";
+import { questions, answers, questionAnswers, courseQuestions, courses } from "@/lib/schema";
 import { eq, asc } from "drizzle-orm";
+
+export async function getCourses() {
+  try {
+    const result = await db.select().from(courses).orderBy(asc(courses.id));
+    return { success: true, data: result };
+  } catch (error) {
+    console.error("获取课程失败:", error);
+    return { success: false, error: "获取课程失败" };
+  }
+}
 
 export async function getQuestionsWithAnswers(courseId: number = 1) {
   try {

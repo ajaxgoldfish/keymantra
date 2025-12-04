@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { getQuestionsWithAnswers } from "@/app/typing/actions";
+import { getQuestionsWithAnswers, getCourses } from "@/app/typing/actions";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -164,6 +164,10 @@ const DictationInput = ({ answer, onComplete }: DictationInputProps) => {
 
 // --- 页面容器 ---
 export default function DictationPage() {
+  // 新增：课程列表状态
+  const [coursesList, setCoursesList] = useState<{id: number, name: string, description: string | null}[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
+
   const [questions, setQuestions] = useState<{id: number, title: string, answerContent: string | null}[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -173,16 +177,34 @@ export default function DictationPage() {
   const [isRevealed, setIsRevealed] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // 1. 初始化加载课程
   useEffect(() => {
-    const loadData = async () => {
-      const res = await getQuestionsWithAnswers();
+    const loadCourses = async () => {
+      setLoading(true);
+      const res = await getCourses();
       if (res.success && res.data) {
-        setQuestions(res.data);
+        setCoursesList(res.data);
       }
       setLoading(false);
     };
-    loadData();
+    loadCourses();
   }, []);
+
+  // 2. 选课后加载题目
+  useEffect(() => {
+    if (!selectedCourseId) return;
+
+    const loadQuestions = async () => {
+      setLoading(true);
+      const res = await getQuestionsWithAnswers(selectedCourseId);
+      if (res.success && res.data) {
+        setQuestions(res.data);
+        setCurrentIndex(0); // 重置题目索引
+      }
+      setLoading(false);
+    };
+    loadQuestions();
+  }, [selectedCourseId]);
 
   // 重置长按状态
   useEffect(() => {
@@ -228,8 +250,57 @@ export default function DictationPage() {
       }
   };
 
+  // Loading 状态
   if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin" /></div>;
-  if (questions.length === 0) return <div className="flex h-screen items-center justify-center">暂无题目</div>;
+
+  // --- 1. 课程选择界面 ---
+  if (!selectedCourseId) {
+    return (
+       <div className="min-h-screen w-full flex flex-col bg-zinc-50 select-none">
+         <header className="w-full p-6 flex justify-between items-center text-zinc-400">
+            <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="gap-2 text-zinc-500 hover:text-zinc-900">
+                <ChevronLeft className="w-4 h-4" /> Back
+            </Button>
+            <div className="font-bold text-zinc-800">KeyMantra Dictation</div>
+         </header>
+         <main className="flex-1 container mx-auto px-4 py-8 flex flex-col items-center">
+            <h1 className="text-3xl font-bold text-zinc-900 mb-8">Select a Course</h1>
+            {coursesList.length === 0 ? (
+                <div className="text-center text-zinc-500">暂无课程数据</div>
+            ) : (
+                <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full max-w-5xl">
+                    {coursesList.map(course => (
+                        <button 
+                            key={course.id}
+                            onClick={() => setSelectedCourseId(course.id)}
+                            className="flex flex-col items-start p-8 bg-white rounded-2xl shadow-sm border border-zinc-200 hover:border-blue-300 hover:shadow-md hover:scale-[1.02] transition-all text-left group"
+                        >
+                            <div className="text-xl font-bold text-zinc-900 group-hover:text-blue-600 transition-colors mb-3">
+                                {course.name}
+                            </div>
+                            {course.description && (
+                                <div className="text-zinc-500 text-sm line-clamp-3 leading-relaxed">
+                                    {course.description}
+                                </div>
+                            )}
+                        </button>
+                    ))}
+                </div>
+            )}
+         </main>
+       </div>
+    );
+  }
+
+  // --- 2. 题目加载为空 ---
+  if (questions.length === 0) {
+      return (
+        <div className="flex h-screen flex-col items-center justify-center gap-4">
+            <div className="text-zinc-500">该课程暂无题目</div>
+            <Button onClick={() => setSelectedCourseId(null)}>返回课程列表</Button>
+        </div>
+      );
+  }
 
   const currentQuestion = questions[currentIndex];
   
@@ -238,19 +309,20 @@ export default function DictationPage() {
      return (
         <div className="flex h-screen flex-col items-center justify-center gap-4">
             <div className="text-2xl font-bold">All Done! 🎉</div>
-            <Button onClick={() => window.history.back()}>Go Back</Button>
+            <Button onClick={() => setSelectedCourseId(null)}>Back to Courses</Button>
         </div>
      );
   }
 
   const currentAnswer = currentQuestion.answerContent || "No Answer Provided";
 
+  // --- 3. 默写界面 ---
   return (
     <div className="min-h-screen w-full flex flex-col bg-zinc-50 select-none">
       <header className="w-full p-6 flex justify-between items-center text-zinc-400">
-         <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="gap-2 text-zinc-500 hover:text-zinc-900">
-           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-           Back
+         {/* 返回按钮改为返回课程列表 */}
+         <Button variant="ghost" size="sm" onClick={() => setSelectedCourseId(null)} className="gap-2 text-zinc-500 hover:text-zinc-900">
+           <ChevronLeft className="w-4 h-4" /> Courses
          </Button>
          <div className="flex items-center gap-6">
             <div className="font-bold text-zinc-800">KeyMantra Dictation</div>
@@ -269,7 +341,7 @@ export default function DictationPage() {
             </p>
         </div>
 
-        {/* --- 新增：长按提示答案区域 --- */}
+        {/* --- 长按提示答案区域 --- */}
         <div 
           className="relative group cursor-pointer select-none"
           onMouseDown={startPress}
