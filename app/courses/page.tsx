@@ -70,7 +70,7 @@ export default function CoursesPage() {
                           className="flex flex-col p-8 bg-white rounded-2xl shadow-sm border border-zinc-200 transition-all hover:shadow-md relative group"
                       >
                           {/* 右上角更多操作按钮 */}
-                          <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="absolute top-4 right-4 transition-opacity">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon-sm" className="h-8 w-8 rounded-full hover:bg-zinc-100">
