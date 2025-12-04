@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { getCourses } from "@/app/typing/actions";
+import { getCourses } from "@/app/questions/actions";
 import { ChevronLeft, Loader2, PenTool, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 

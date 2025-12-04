@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { getQuestionsWithAnswers } from "@/app/typing/actions";
+import { getQuestionsWithAnswers } from "@/app/questions/actions";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useParams, useRouter } from "next/navigation";
