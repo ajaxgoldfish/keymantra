@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+    <html lang="en">
         <body className={`antialiased`}>
           <header className="flex justify-end p-4 gap-4 absolute top-0 right-0 z-50">
             <SignedOut>
@@ -30,9 +30,9 @@ export default function RootLayout({
               <UserButton />
             </SignedIn>
           </header>
-          {children}
-        </body>
-      </html>
+        {children}
+      </body>
+    </html>
     </ClerkProvider>
   );
 }
